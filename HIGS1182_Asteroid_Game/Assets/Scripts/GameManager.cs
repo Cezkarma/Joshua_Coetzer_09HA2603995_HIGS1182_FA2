@@ -9,9 +9,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TMP_Text outcomeText;
     [SerializeField] private TMP_Text amountCollectedText;
 
-    private static int scrapCollected;
-    private static int scrapTotal;
-
+    private static int score;
+    private static int wave = 1;
     private static string outcome = "You lost!";
 
     private void Start()
@@ -23,7 +22,7 @@ public class GameManager : MonoBehaviour
 
         if (amountCollectedText != null)
         {
-            amountCollectedText.text = $"You picked up {scrapCollected}/{scrapTotal} pieces of scrap!";
+            amountCollectedText.text = $"You collected {score} scrap and reached wave {wave}!";
         }
     }
 
@@ -35,10 +34,14 @@ public class GameManager : MonoBehaviour
 
     public void QuitGame() => Application.Quit();
 
-    public static void ReportScrap(int collected, int total)
+    public static void ReportScore(int newScore)
     {
-        scrapCollected = collected;
-        scrapTotal = total;
+        score = newScore;
+    }
+
+    public static void ReportWave(int newWave)
+    {
+        wave = newWave;
     }
 
     public static void EndRun(string result)

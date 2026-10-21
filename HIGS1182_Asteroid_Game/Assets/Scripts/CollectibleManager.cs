@@ -1,13 +1,14 @@
+using System;
 using TMPro;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class CollectibleManager : MonoBehaviour
 {
     [SerializeField] private GameObject scrapPrefab;
-    [SerializeField] private int scrapCount = 10;
 
     [Header("UI")]
-    [Tooltip("Shows the running tally as 'Scrap: collected/total'.")]
+    [Tooltip("Shows the score and how much scrap is left in this wave.")]
     [SerializeField] private TMP_Text scoreText;
 
     [Header("Placement")]
@@ -22,24 +23,32 @@ public class CollectibleManager : MonoBehaviour
     [SerializeField] private Color pickupColour = new Color(0.3f, 1f, 0.5f);
     [SerializeField] private float pickupBurstSize = 3f;
 
-    private int total;
-    private int collected;
+    public event Action AllScrapCollected;
 
-    private void Start()
+    private int score;
+    private int remaining;
+
+    private void Awake()
     {
-        total = scrapCount;
-        GameManager.ReportScrap(collected, total);
+        GameManager.ReportScore(score);
         RefreshScoreText();
 
         if (scrapPrefab == null)
         {
             Debug.LogWarning("CollectibleManager: assign a scrap prefab, otherwise nothing will spawn.", this);
+        }
+    }
+
+    public void SpawnScrap(int count)
+    {
+        if (scrapPrefab == null)
+        {
             return;
         }
 
         Vector3 centre = player != null ? player.position : transform.position;
 
-        for (int i = 0; i < scrapCount; i++)
+        for (int i = 0; i < count; i++)
         {
             Vector3 position = centre + Random.onUnitSphere * Random.Range(minDistance, maxDistance);
 
@@ -48,23 +57,26 @@ public class CollectibleManager : MonoBehaviour
                 .Collected += OnScrapCollected;
         }
 
-        Debug.Log($"Generated all {scrapCount} pieces of scrap.");
+        remaining += count;
+        RefreshScoreText();
+        Debug.Log($"Generated {count} pieces of scrap.");
     }
 
     private void OnScrapCollected(Vector3 position)
     {
-        collected++;
-        GameManager.ReportScrap(collected, total);
+        score++;
+        remaining--;
+        GameManager.ReportScore(score);
         RefreshScoreText();
-        Debug.Log($"Scrap collected. {total - collected} piece(s) left.");
+        Debug.Log($"Scrap collected. Score {score}, {remaining} piece(s) left this wave.");
 
         Effects.SpawnBurst(position, pickupBurstSize, pickupColour);
         HUDManager.ShowMessage("+1 Scrap", pickupColour);
 
-        if (collected >= total)
+        if (remaining <= 0)
         {
-            Debug.Log("Game won: all scrap collected.");
-            GameManager.EndRun("You won!");
+            Debug.Log("Wave cleared: all scrap collected.");
+            AllScrapCollected?.Invoke();
         }
     }
 
@@ -75,13 +87,13 @@ public class CollectibleManager : MonoBehaviour
             return;
         }
 
-        scoreText.text = $"Scrap: {collected}/{total}";
+        scoreText.text = $"Scrap: {score}  ({remaining} left)";
     }
 }
 
 public class ScrapPickup : MonoBehaviour
 {
-    public System.Action<Vector3> Collected;
+    public Action<Vector3> Collected;
 
     private void OnTriggerEnter(Collider other)
     {

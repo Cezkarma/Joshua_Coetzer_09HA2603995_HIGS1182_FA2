@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class AsteroidsSpawner : MonoBehaviour
+public class AsteroidSpawner : MonoBehaviour
 {
     [SerializeField] private GameObject asteroidPrefab;
 
@@ -19,20 +19,27 @@ public class AsteroidsSpawner : MonoBehaviour
              "0 aims them straight at the player, 90 is effectively a random direction.")]
     [SerializeField] private float spreadAngle = 30f;
 
+    private float intervalScale = 1f;
+
     private IEnumerator Start()
     {
         if (asteroidPrefab == null || asteroidPrefab.GetComponent<Asteroid>() == null)
         {
-            Debug.LogWarning("AsteroidsSpawner: assign an asteroid prefab that has an Asteroid " + "component, otherwise nothing will spawn.", this);
+            Debug.LogWarning("AsteroidSpawner: assign an asteroid prefab that has an Asteroid " + "component, otherwise nothing will spawn.", this);
             yield break;
         }
 
         while (true)
         {
-            yield return new WaitForSeconds(Random.Range(minInterval, maxInterval));
+            yield return new WaitForSeconds(Random.Range(minInterval, maxInterval) * intervalScale);
 
             Spawn(player != null ? player.position : transform.position);
         }
+    }
+
+    public void SetIntervalScale(float scale)
+    {
+        intervalScale = scale;
     }
 
     private void Spawn(Vector3 centre)
