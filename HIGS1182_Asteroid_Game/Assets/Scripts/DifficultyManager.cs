@@ -35,6 +35,8 @@ public class DifficultyManager : MonoBehaviour
 
     private void Start()
     {
+        GameManager.StartRun();
+
         if (collectibleManager == null || enemySpawner == null || asteroidSpawner == null)
         {
             Debug.LogWarning("DifficultyManager: assign the collectible manager, enemy spawner and asteroid spawner, otherwise waves will not work.", this);
