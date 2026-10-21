@@ -12,13 +12,13 @@ public class GameManager : MonoBehaviour
     private static int scrapCollected;
     private static int scrapTotal;
 
-    private static bool CollectedEverything => scrapTotal > 0 && scrapCollected >= scrapTotal;
+    private static string outcome = "You lost!";
 
     private void Start()
     {
         if (outcomeText != null)
         {
-            outcomeText.text = CollectedEverything ? "You won!" : "You lost!";
+            outcomeText.text = outcome;
         }
 
         if (amountCollectedText != null)
@@ -41,8 +41,11 @@ public class GameManager : MonoBehaviour
         scrapTotal = total;
     }
 
-    public static void EndRun()
+    public static void EndRun(string result)
     {
+        outcome = result;
+        Debug.Log($"Run ended: {result}");
+
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 

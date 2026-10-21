@@ -35,6 +35,6 @@ public class Asteroid : MonoBehaviour
         }
 
         Debug.Log("Game lost: an asteroid hit the player.");
-        GameManager.EndRun();
+        GameManager.EndRun("You lost! Hit by an asteroid.");
     }
 }
