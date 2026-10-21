@@ -95,13 +95,8 @@ public class ScrapPickup : MonoBehaviour
 {
     public Action<Vector3> Collected;
 
-    private void OnTriggerEnter(Collider other)
+    public void Collect()
     {
-        if (!GameTags.Matches(other, GameTags.Player))
-        {
-            return;
-        }
-
         Collected?.Invoke(transform.position);
         Destroy(gameObject);
     }

@@ -11,11 +11,16 @@ public class Asteroid : MonoBehaviour
     [Tooltip("Seconds the asteroid stays alive before despawning.")]
     [SerializeField] private float lifetime = 45f;
 
+    private Rigidbody rb;
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        rb.useGravity = false;
+    }
+
     public void Launch(Vector3 direction)
     {
-        Rigidbody rb = GetComponent<Rigidbody>();
-
-        rb.useGravity = false;
         rb.linearVelocity = direction.normalized * Random.Range(minSpeed, maxSpeed);
 
         Invoke(nameof(Despawn), lifetime);
@@ -25,16 +30,5 @@ public class Asteroid : MonoBehaviour
     {
         Debug.Log("Asteroid destroyed: lifetime ran out.");
         Destroy(gameObject);
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (!GameTags.Matches(collision.collider, GameTags.Player))
-        {
-            return;
-        }
-
-        Debug.Log("Game lost: an asteroid hit the player.");
-        GameManager.EndRun("You lost! Hit by an asteroid.");
     }
 }

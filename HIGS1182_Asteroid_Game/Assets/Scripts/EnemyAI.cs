@@ -143,15 +143,4 @@ public class EnemyAI : MonoBehaviour
     {
         waypoint = patrolCentre + Random.insideUnitSphere * patrolRadius;
     }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (!GameTags.Matches(collision.collider, GameTags.Player))
-        {
-            return;
-        }
-
-        Debug.Log("Game lost: an enemy drone hit the player.");
-        GameManager.EndRun("You lost! Destroyed by an enemy drone.");
-    }
 }

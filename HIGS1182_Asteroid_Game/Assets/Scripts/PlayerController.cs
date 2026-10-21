@@ -97,7 +97,6 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // The mouse axes are already per-frame deltas, so they must not be scaled by deltaTime.
         yaw += Input.GetAxis("Mouse X") * mouseSensitivity;
 
         float pitchDelta = Input.GetAxis("Mouse Y") * mouseSensitivity;
@@ -158,9 +157,36 @@ public class PlayerController : MonoBehaviour
         chaseCamera.SetTarget(this);
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        GameObject other = collision.gameObject;
+
+        if (other.CompareTag(GameTags.Asteroid))
+        {
+            Die("Hit by an asteroid");
+        }
+        else if (other.CompareTag(GameTags.Enemy))
+        {
+            Die("Destroyed by an enemy drone");
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag(GameTags.Scrap) && other.TryGetComponent(out ScrapPickup scrap))
+        {
+            scrap.Collect();
+        }
+    }
+
+    private void Die(string cause)
+    {
+        Debug.Log($"Game lost: {cause}.");
+        GameManager.EndRun($"You lost! {cause}.");
+    }
+
     private void OnValidate()
     {
-        // Keeps drag tweaks live while tuning in play mode.
         if (rb != null)
         {
             rb.linearDamping = linearDamping;

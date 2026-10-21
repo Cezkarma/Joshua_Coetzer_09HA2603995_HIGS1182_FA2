@@ -41,7 +41,6 @@ public class PlayerShooting : MonoBehaviour
 
     private void Update()
     {
-        // The left click that re-locks the cursor should not also fire.
         if (Input.GetMouseButtonDown(0) && Cursor.lockState == CursorLockMode.Locked)
         {
             HandleShooting();

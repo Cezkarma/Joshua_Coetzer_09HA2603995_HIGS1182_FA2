@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using UnityEngine;
 
@@ -15,10 +14,6 @@ public class Health : MonoBehaviour
     [SerializeField] private float deathBurstSize = 4f;
 
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
-
-    public event Action<int> Damaged;
-
-    public event Action Died;
 
     public int CurrentHealth { get; private set; }
     public int MaxHealth => maxHealth;
@@ -46,7 +41,6 @@ public class Health : MonoBehaviour
 
         CurrentHealth = Mathf.Max(CurrentHealth - amount, 0);
         Debug.Log($"{name} took {amount} damage ({CurrentHealth}/{maxHealth} health left).");
-        Damaged?.Invoke(CurrentHealth);
 
         if (IsDead)
         {
@@ -61,7 +55,6 @@ public class Health : MonoBehaviour
     private void Die()
     {
         Debug.Log($"{name} destroyed.");
-        Died?.Invoke();
 
         Effects.SpawnBurst(transform.position, deathBurstSize, deathBurstColour);
         Destroy(gameObject);
