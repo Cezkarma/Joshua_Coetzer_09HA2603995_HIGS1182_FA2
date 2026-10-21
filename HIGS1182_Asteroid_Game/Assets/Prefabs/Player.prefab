@@ -416,6 +416,12 @@ MonoBehaviour:
   shootingPoint: {fileID: 8535172424419876049}
   range: 400
   shipClearance: 15
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 192
+  damage: 1
+  hitColour: {r: 1, g: 0.3, b: 0.2, a: 1}
+  hitBurstSize: 1.5
 --- !u!114 &3271771002
 MonoBehaviour:
   m_ObjectHideFlags: 0

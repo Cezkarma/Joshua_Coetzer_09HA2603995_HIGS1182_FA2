@@ -9,6 +9,15 @@ public class PlayerShooting : MonoBehaviour
     [Tooltip("How far down the camera's line of sight aiming starts, so the ship's own hull is never read as the target.")]
     [SerializeField] private float shipClearance = 15f;
 
+    [Header("Damage")]
+    [Tooltip("Layers a shot can hit. Set this to Asteroid and Enemy.")]
+    [SerializeField] private LayerMask targetLayers = ~0;
+    [SerializeField] private int damage = 1;
+
+    [Header("Feedback")]
+    [SerializeField] private Color hitColour = new Color(1f, 0.3f, 0.2f);
+    [SerializeField] private float hitBurstSize = 1.5f;
+
     private Camera cam;
 
     private void Awake()
@@ -35,28 +44,44 @@ public class PlayerShooting : MonoBehaviour
         // The left click that re-locks the cursor should not also fire.
         if (Input.GetMouseButtonDown(0) && Cursor.lockState == CursorLockMode.Locked)
         {
-            Fire();
+            HandleShooting();
         }
     }
 
-    private void Fire()
+    private void HandleShooting()
     {
         Vector3 origin = shootingPoint.position;
         Vector3 direction = (GetAimPoint() - origin).normalized;
 
         Debug.DrawRay(origin, direction * range, Color.red, 0.2f);
 
-        if (!Raycast(new Ray(origin, direction), out RaycastHit hit))
+        if (Raycast(new Ray(origin, direction), out RaycastHit hit))
+        {
+            ApplyDamage(hit);
+        }
+    }
+
+    private void ApplyDamage(RaycastHit hit)
+    {
+        GameObject target = hit.rigidbody != null ? hit.rigidbody.gameObject : hit.collider.gameObject;
+
+        if (!target.CompareTag(GameTags.Asteroid) && !target.CompareTag(GameTags.Enemy))
         {
             return;
         }
 
-        Asteroid asteroid = hit.collider.GetComponentInParent<Asteroid>();
-        if (asteroid != null)
+        Health health = target.GetComponent<Health>();
+        if (health == null)
         {
-            Debug.Log("Asteroid destroyed by a shot.");
-            Destroy(asteroid.gameObject);
+            Debug.LogWarning($"PlayerShooting: {target.name} is tagged {target.tag} but has no Health component.", target);
+            return;
         }
+
+        Debug.Log($"Shot hit {target.tag}: {target.name}.");
+        health.ApplyDamage(damage);
+
+        Effects.SpawnBurst(hit.point, hitBurstSize, hitColour);
+        HUDManager.ShowMessage(health.IsDead ? $"{target.tag} destroyed" : $"{target.tag} hit ({health.CurrentHealth}/{health.MaxHealth})", hitColour);
     }
 
     private Vector3 GetAimPoint()
@@ -69,6 +94,6 @@ public class PlayerShooting : MonoBehaviour
 
     private bool Raycast(Ray ray, out RaycastHit hit)
     {
-        return Physics.Raycast(ray, out hit, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+        return Physics.Raycast(ray, out hit, range, targetLayers, QueryTriggerInteraction.Ignore);
     }
 }
