@@ -17,6 +17,11 @@ public class CollectibleManager : MonoBehaviour
     [SerializeField] private float minDistance = 40f;
     [SerializeField] private float maxDistance = 150f;
 
+    [Header("Feedback")]
+    [Tooltip("Colour of the pickup burst and the '+1 Scrap' message.")]
+    [SerializeField] private Color pickupColour = new Color(0.3f, 1f, 0.5f);
+    [SerializeField] private float pickupBurstSize = 3f;
+
     private int total;
     private int collected;
 
@@ -46,12 +51,15 @@ public class CollectibleManager : MonoBehaviour
         Debug.Log($"Generated all {scrapCount} pieces of scrap.");
     }
 
-    private void OnScrapCollected()
+    private void OnScrapCollected(Vector3 position)
     {
         collected++;
         GameManager.ReportScrap(collected, total);
         RefreshScoreText();
         Debug.Log($"Scrap collected. {total - collected} piece(s) left.");
+
+        Effects.SpawnBurst(position, pickupBurstSize, pickupColour);
+        HUDManager.ShowMessage("+1 Scrap", pickupColour);
 
         if (collected >= total)
         {
@@ -73,16 +81,16 @@ public class CollectibleManager : MonoBehaviour
 
 public class ScrapPickup : MonoBehaviour
 {
-    public System.Action Collected;
+    public System.Action<Vector3> Collected;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.GetComponentInParent<PlayerController>() == null)
+        if (!GameTags.Matches(other, GameTags.Player))
         {
             return;
         }
 
-        Collected?.Invoke();
+        Collected?.Invoke(transform.position);
         Destroy(gameObject);
     }
 }

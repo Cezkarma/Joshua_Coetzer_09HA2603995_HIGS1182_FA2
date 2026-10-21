@@ -29,7 +29,7 @@ public class Asteroid : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.collider.GetComponentInParent<PlayerController>() == null)
+        if (!GameTags.Matches(collision.collider, GameTags.Player))
         {
             return;
         }
